@@ -10,6 +10,14 @@ type Comparator struct {
 	ComparisonFile2 *ComparisonFile
 }
 
+const (
+	// a value that is neither too long nor too short
+	checkWordLength = 10
+
+	// Length of characters in comparison result
+	displayWordLength = 100
+)
+
 func NewComparator(comparisonFile1 *ComparisonFile, comparisonFile2 *ComparisonFile) *Comparator {
 	return &Comparator{ComparisonFile1: comparisonFile1, ComparisonFile2: comparisonFile2}
 }
@@ -22,9 +30,6 @@ func (c *Comparator) PrintWordDiff() error {
 	} else {
 		rightPadding = len(c.ComparisonFile1.Label) - len(c.ComparisonFile2.Label)
 	}
-
-	checkStrictsLength := 10
-	displayWordLength := 100
 
 	differencePointIndex := 0
 	tmpData := make([]byte, len(c.ComparisonFile2.Data))
@@ -44,7 +49,7 @@ func (c *Comparator) PrintWordDiff() error {
 		fmt.Printf("%s%s: %s \n", c.ComparisonFile2.Label, strings.Repeat(" ", rightPadding), string(tmpData[i:i+displayWordLength]))
 		fmt.Printf("=========== word-diff::: %s: %d ==========\n", c.ComparisonFile1.Label, differencePointIndex)
 
-		incr := c.checkStrictsWords(c.ComparisonFile1.Data[i:i+checkStrictsLength], tmpData[i:])
+		incr := c.checkSameWords(c.ComparisonFile1.Data[i:i+checkWordLength], tmpData[i:])
 		// offset
 		tmpData = append(tmpData[:differencePointIndex], tmpData[differencePointIndex+incr:]...)
 	}
@@ -52,7 +57,7 @@ func (c *Comparator) PrintWordDiff() error {
 	return nil
 }
 
-func (c *Comparator) checkStrictsWords(testWords []byte, words []byte) int {
+func (c *Comparator) checkSameWords(testWords []byte, words []byte) int {
 	tmpIndex := 0
 	testWordsIndex := 0
 	firstSamePointIndex := 0

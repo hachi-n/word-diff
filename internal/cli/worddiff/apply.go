@@ -10,6 +10,5 @@ func Apply(fileName1, fileName2 string) error {
 		model.NewComparisonFile(fileName1, loader.LoadWithFailOnExit(fileName1)),
 		model.NewComparisonFile(fileName2, loader.LoadWithFailOnExit(fileName2)),
 	)
-	comparator.PrintWordDiff()
-	return nil
+	return comparator.PrintWordDiff()
 }
