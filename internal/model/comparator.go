@@ -25,15 +25,20 @@ func NewComparator(comparisonFile1 *ComparisonFile, comparisonFile2 *ComparisonF
 func (c *Comparator) PrintWordDiff() error {
 	leftPadding := 0
 	rightPadding := 0
-	if c.ComparisonFile1.Label < c.ComparisonFile2.Label {
-		leftPadding = len(c.ComparisonFile2.Label) - len(c.ComparisonFile1.Label)
+
+	file1LabelLength := len(c.ComparisonFile1.Label)
+	file2LabelLength := len(c.ComparisonFile2.Label)
+	if file1LabelLength < file2LabelLength {
+		leftPadding = file2LabelLength - file1LabelLength
 	} else {
-		rightPadding = len(c.ComparisonFile1.Label) - len(c.ComparisonFile2.Label)
+		rightPadding = file1LabelLength - file2LabelLength
 	}
 
 	differencePointIndex := 0
 	tmpData := make([]byte, len(c.ComparisonFile2.Data))
 	copy(tmpData, c.ComparisonFile2.Data)
+
+	count := 1
 
 	for i, v := range c.ComparisonFile1.Data {
 		if v == tmpData[i] {
@@ -43,15 +48,16 @@ func (c *Comparator) PrintWordDiff() error {
 		// difference pattern.
 		differencePointIndex = i
 
-		fmt.Printf("=========== word-diff::: %s: %d ==========\n", c.ComparisonFile1.Label, differencePointIndex)
+		fmt.Printf("=========== %d. word-diff::: %s: %d ==========\n", count, c.ComparisonFile1.Label, differencePointIndex)
 		fmt.Printf("index:%d, value:%s \n", differencePointIndex, string(v))
 		fmt.Printf("%s%s: %s \n", c.ComparisonFile1.Label, strings.Repeat(" ", leftPadding), string(c.ComparisonFile1.Data[i:i+displayWordLength]))
 		fmt.Printf("%s%s: %s \n", c.ComparisonFile2.Label, strings.Repeat(" ", rightPadding), string(tmpData[i:i+displayWordLength]))
-		fmt.Printf("=========== word-diff::: %s: %d ==========\n", c.ComparisonFile1.Label, differencePointIndex)
+		fmt.Printf("=========== %d. word-diff::: %s: %d ==========\n", count, c.ComparisonFile1.Label, differencePointIndex)
 
 		incr := c.checkSameWords(c.ComparisonFile1.Data[i:i+checkWordLength], tmpData[i:])
 		// offset
 		tmpData = append(tmpData[:differencePointIndex], tmpData[differencePointIndex+incr:]...)
+		count++
 	}
 
 	return nil
